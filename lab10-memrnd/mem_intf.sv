@@ -12,7 +12,8 @@ interface mem_intf #(AddrWidth = 5, DataWidth = 8) (input logic clk);
                 output data_out);
 
     modport tb(output addr, data_in, read, write, clk, 
-                input data_out);
+                input data_out,
+                import write_mem, read_mem);
     // add read_mem and write_mem tasks
     task write_mem(input logic[4:0]waddr, input logic [7:0]wdata, input debug);
     @(negedge clk)
