@@ -20,13 +20,12 @@ class counter;
     int max;
     int min;
 
-    function new(int val, int max, int min);
-        this.check_limit(this.max, this.min);
-        this.check_set(count);
-
+    function new(input int val, max, min);
+        this.check_limit(max, min);
+        this.check_set(val);
     endfunction
 
-    function void load(int val);
+    function void load(input int val);
         this.check_set(val);
     endfunction
 
@@ -34,7 +33,7 @@ class counter;
         return count;
     endfunction
 
-    function void check_limit(int max, min);
+    function void check_limit(input int max, min);
         if(max < min) begin
             this.max = min;
             this.min = max;
@@ -43,11 +42,13 @@ class counter;
             this.max = max;
             this.min = min;
         end
+       
     endfunction
 
-    function void check_set(int set);
+    function void check_set(input int set);
         if(set >= min && set <= max) begin
             count = set; 
+            $display("count = %d, max = %d, min = %d", count, max, min);
         end
         else begin 
             count = min;
@@ -58,30 +59,42 @@ class counter;
 endclass : counter 
 
 class upcounter extends counter;
-    function new(int val, int max, int min);
+    bit carry;
+    function new(input int val, max, min);
         super.new(val, max, min);
+        carry = 0;
     endfunction
 
     function void next();
-        if(count < max)count++;
-        else count = min;
-        check_set(count);
-        $display("using upcounter: %d", count);
+        if(count == max)begin
+            count = min;
+            carry = 1;
+        end
+        else begin
+            count++;
+            carry = 0;
+        end
+        $display("using upcounter: carry = %d, count = %d", carry, count);
     endfunction
 endclass : upcounter 
 
 class downcounter extends counter;
-
-    function new(int val, int max, int min);
+    bit borrow;
+    function new(input int val, max, min);
         super.new(val, max, min);
+        borrow = 0;
     endfunction
 
     function void next();
-        count--;
-        if(count > min) count--;
-        else count = max;
-        check_set(count);
-        $display("using downcounter: %d", count);
+        if(count == min)begin
+            count = max;
+            borrow = 1;
+        end
+        else begin
+            count--;
+            borrow = 0;
+        end
+        $display("using downcounter: borrow = %d, count = %d", borrow, count);
     endfunction
 
 
@@ -95,12 +108,12 @@ int cnt;
 initial begin
     c1 = new(5, 8, 10);
     cnt = c1.getcount();
-    $display("cnt = %d", cnt);
 
     $display("\n=========================");
-    c2 = new(6, 4, 15);
-    $display("cnt = %d", c2.getcount());
+    c2 = new(6, 4, 10);
     $display("Aftering using upcounter");
+    c2.next();
+    c2.next();
     c2.next();
     c2.next();
     c2.next();
@@ -109,14 +122,16 @@ initial begin
    
     $display("\n=========================");
     c3 = new(8, 1, 20);
-    $display("cnt = %d", c3.getcount());
     $display("Aftering using downcounter");
     c3.next();
     c3.next();
     c3.next();
     c3.next();
     c3.next();
-    
+    c3.next();
+    c3.next();
+    c3.next();
+    c3.next();
 
 end
 
