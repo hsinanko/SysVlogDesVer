@@ -60,9 +60,11 @@ endclass : counter
 
 class upcounter extends counter;
     bit carry;
+    static int num = 0;
     function new(input int val, max, min);
         super.new(val, max, min);
         carry = 0;
+        num++;
     endfunction
 
     function void next();
@@ -76,13 +78,19 @@ class upcounter extends counter;
         end
         $display("using upcounter: carry = %d, count = %d", carry, count);
     endfunction
+
+    static function int total_num();
+        return num;
+    endfunction
 endclass : upcounter 
 
 class downcounter extends counter;
     bit borrow;
+    static int num = 0;
     function new(input int val, max, min);
         super.new(val, max, min);
         borrow = 0;
+        num++;
     endfunction
 
     function void next();
@@ -97,41 +105,79 @@ class downcounter extends counter;
         $display("using downcounter: borrow = %d, count = %d", borrow, count);
     endfunction
 
-
+    static function int total_num();
+        return num;
+    endfunction
 endclass : downcounter 
 
-counter c1;
-upcounter c2;
+class timer;
+    upcounter hours, minutes, seconds;
+    function new(input int hr, min, sec);
+        hours   = new(hr, 23, 0);
+        minutes = new(min, 59, 0);
+        seconds = new(sec, 59, 0);
 
-downcounter c3;
-int cnt;
+    endfunction
+
+    function void load(input int hr=0, min=0, sec=0);
+        hours.load(hr);
+        minutes.load(min);
+        seconds.load(sec);
+    endfunction
+
+    function void showval();
+        $display("Time: %d hr %d min %d sec", hours.count, minutes.count, seconds.count);
+    endfunction
+
+    function void next();
+        seconds.next();
+        if(seconds.carry)begin
+            minutes.next();
+            if(minutes.carry) hours.next();
+        end
+        showval();
+    endfunction
+
+endclass : timer
+
+// counter c1;
+// upcounter c2;
+
+// downcounter c3;
+// int cnt;
+
+timer clock;
+
 initial begin
-    c1 = new(5, 8, 10);
-    cnt = c1.getcount();
 
-    $display("\n=========================");
-    c2 = new(6, 4, 10);
-    $display("Aftering using upcounter");
-    c2.next();
-    c2.next();
-    c2.next();
-    c2.next();
-    c2.next();
-    c2.next();
+    clock = new(10, 21, 45);
+    repeat(17) clock.next();
+    // c1 = new(5, 8, 10);
+    // cnt = c1.getcount();
+
+    // $display("\n=========================");
+    // c2 = new(6, 4, 10);
+    // $display("Aftering using upcounter");
+    // c2.next();
+    // c2.next();
+    // c2.next();
+    // c2.next();
+    // c2.next();
+    // c2.next();
    
    
-    $display("\n=========================");
-    c3 = new(8, 1, 20);
-    $display("Aftering using downcounter");
-    c3.next();
-    c3.next();
-    c3.next();
-    c3.next();
-    c3.next();
-    c3.next();
-    c3.next();
-    c3.next();
-    c3.next();
+    // $display("\n=========================");
+    // c3 = new(8, 1, 20);
+    // $display("Aftering using downcounter");
+    // c3.next();
+    // c3.next();
+    // c3.next();
+    // c3.next();
+    // c3.next();
+    // c3.next();
+    // c3.next();
+    // c3.next();
+    // c3.next();
 
 end
 
