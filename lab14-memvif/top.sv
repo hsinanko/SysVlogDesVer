@@ -26,10 +26,10 @@ bit         clk;
 // wire [7:0] data_in;       // data_to_mem
 
 mem_intf mbus (clk);
-
+mem_intf mbus2 (clk);
 // SYSTEMVERILOG:: implicit .* port connections
 //mem_test test (.*);
-mem_test test(.mbus(mbus.tb));
+mem_test test(.mbus(mbus.tb), .mbus2(mbus.tb));
 // SYSTEMVERILOG:: implicit .name port connections
 // mem memory ( .clk, .read, .write, .addr,
 //               .data_in, .data_out

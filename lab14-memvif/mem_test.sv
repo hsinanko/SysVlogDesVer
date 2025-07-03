@@ -5,7 +5,8 @@ module mem_test ( // input logic clk,
                   // output logic [4:0] addr, 
                   // output logic [7:0] data_in,     // data TO memory
                   // input  wire [7:0] data_out     // data FROM memory
-                  mem_intf.tb mbus
+                  mem_intf.tb mbus,
+                  mem_intf.tb mbus2
                 );
 // SYSTEMVERILOG: timeunit and timeprecision specification
 timeunit 1ns;
@@ -32,8 +33,8 @@ class random_data;
   endfunction
   constraint different {
     control == ascii -> data inside {[8'h20:8'h7F]};
-    control == lowercase -> data inside {[8'h41:8'h5a], [8'h61:8'h7a]};
-    control == uppercase -> data inside {[8'h41:8'h5a], [8'h61:8'h7a]};
+    control == lowercase -> data inside {[8'h61:8'h7a]};
+    control == uppercase -> data inside {[8'h41:8'h5a]};
     control == weightedcase -> data dist {[8'h41:8'h5a]:=80, [8'h61:8'h7a]:=20};
   }
   // constraint charactor { data inside {[8'h20:8'h7F]};}
@@ -74,6 +75,7 @@ endclass : random_data
 /*=================== Test =========================*/
 
 random_data mem;
+random_data mem2;
 // Monitor Results
   initial begin
       $timeformat ( -9, 0, " ns", 9 );
@@ -89,6 +91,7 @@ random_data mem;
     mem = new;
     mem.configure(mbus);
     mem.control = weightedcase;
+
     for(int i = 0; i < 32; i++)begin
       ok = mem.randomize();
       if(!ok) $display("Wrong!! There is an error about randomization");
@@ -96,7 +99,19 @@ random_data mem;
       mem.read_mem(debug);
     end
     // print results of test
-      printstatus(error_status);
+
+    mem2 = new;
+    mem2.configure(mbus2);
+    mem2.control = lowercase;
+
+    for(int i = 0; i < 32; i++)begin
+      ok = mem2.randomize();
+      if(!ok) $display("Wrong!! There is an error about randomization");
+      mem2.write_mem(debug);
+      mem2.read_mem(debug);
+    end
+
+    printstatus(error_status);
       $finish;
   end
 
